@@ -1,5 +1,7 @@
 # project_settings.nvim
 
+![ci](https://github.com/martini97/project-config.nvim/actions/workflows/ci.yml/badge.svg?branch=main)
+
 Define variable per project.
 
 ## **⚠️ WARNING ⚠️**

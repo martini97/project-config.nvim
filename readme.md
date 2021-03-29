@@ -2,7 +2,7 @@
 
 Define variable per project.
 
-## **WARNING**
+## **⚠️ WARNING ⚠️**
 
 This plugin allows for the execution of vimscript, this could result
 in the execution of malicious code. To remediate that we only source files
@@ -50,3 +50,4 @@ Path to the file where we will store the trust database, defaults to
 + [x] Implement trusted files
 + [ ] Preview file before execution
 + [ ] Write tests
++ [ ] Allow user to distrust a file permanently

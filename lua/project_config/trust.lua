@@ -7,6 +7,9 @@ local utils = require('project_config.utils')
 function M.has_trust(project_file)
   local cached = cache.get_cached()
   local sha = utils.sha256(project_file)
+
+  if not sha then return nil end
+
   return cached[project_file] == sha
 end
 

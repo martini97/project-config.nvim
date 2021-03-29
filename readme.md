@@ -48,6 +48,6 @@ Path to the file where we will store the trust database, defaults to
 ## TODO
 
 + [x] Implement trusted files
++ [x] Write tests
 + [ ] Preview file before execution
-+ [ ] Write tests
 + [ ] Allow user to distrust a file permanently

@@ -11,7 +11,12 @@ function M.index_of(table, value)
 end
 
 function M.sha256(file)
-  return vim.api.nvim_eval('sha256("' .. file .. '")')
+  local p = Path:new(file)
+
+  if not p:exists() then return nil end
+
+  local file_contents = table.concat(p:readlines(), "\n")
+  return vim.api.nvim_eval('sha256("' .. file_contents .. '")')
 end
 
 function M.confirm(dialog, options, default)

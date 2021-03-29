@@ -51,5 +51,7 @@ Path to the file where we will store the trust database, defaults to
 
 + [x] Implement trusted files
 + [x] Write tests
++ [ ] Save config files on data dir
 + [ ] Preview file before execution
 + [ ] Allow user to distrust a file permanently
++ [ ] Command to edit/create config file

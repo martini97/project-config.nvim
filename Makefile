@@ -1,5 +1,4 @@
 test:
-	rm -rf ${PWD}/tmp
 	nvim --headless \
 		--noplugin \
 		-u tests/minimal.vim \

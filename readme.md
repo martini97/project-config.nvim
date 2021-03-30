@@ -84,3 +84,4 @@ nmap <space>! <plug>ProjectConfigUntrust
 + [ ] Preview file before execution
 + [ ] Allow user to distrust a file permanently
 + [ ] Command to edit/create config file
++ [ ] Use `:inputlist()` instead of confirm

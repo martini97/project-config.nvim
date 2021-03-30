@@ -1,42 +1,48 @@
-local M = {}
-
-local Path = require("plenary.path")
-local cache = require('project_config.cache')
+local trust = {}
 local utils = require('project_config.utils')
+local cache = require('project_config.cache')
 
-function M.has_trust(project_file)
-  local cached = cache.get_cached()
-  local sha = utils.sha256(project_file)
+-- compares file signature with cache
+function trust.is_trusted (file)
+  local signature = utils.file_signature(file)
+  if not signature or not file:exists() then
+    return false
+  end
 
-  if not sha then return nil end
+  local cache_data = cache.get_cached()
+  local cache_signature = cache_data[file:absolute()]
 
-  return cached[project_file] == sha
+  if not cache_signature then return false end
+
+  return cache_signature == signature
 end
 
-function M.should_trust(project_file)
-  if M.has_trust(project_file) then
+-- ask for user confirmation if should or not trust file
+function trust.should_trust (file)
+  if not file:exists() then
+    return false
+  end
+
+  if trust.is_trusted(file) then
     return true
   end
 
-  local file = Path:new(project_file):normalize()
-  local trust = utils.confirm(
-    "Do you want to trust " .. file .. "?",
+  local trusted = utils.confirm(
+    "Do you want to trust " .. file:normalize() .. "?",
     {"yes", "no"},
     "no"
   )
 
-  return trust == 1
+  return trusted == 1
 end
 
-function M.set_trust(project_file, trust)
-  local sha = ''
-  if trust then
-    sha = utils.sha256(project_file)
+function trust.set_trust (file, trusted)
+  local signature = ''
+  if trusted then
+    signature = utils.file_signature(file)
   end
 
-  local cached = cache.get_cached()
-  cached[project_file] = sha
-  cache.set_cached(cached)
+  cache.set_cached(file:absolute(), signature)
 end
 
-return M
+return trust

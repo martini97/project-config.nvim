@@ -2,7 +2,6 @@ local Path = require('plenary.path')
 local stub = require('luassert.stub')
 
 local plugin = require('project_config')
-local utils = require('project_config.utils')
 local trust = require('project_config.trust')
 
 describe('project_config', function ()

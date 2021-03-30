@@ -3,7 +3,7 @@ local cache = {}
 local Path = require("plenary.path")
 
 local function get_cache_file ()
-	return Path:new(vim.g.project_config_cache_file)
+  return Path:new(vim.g.project_config_cache_file)
 end
 
 --- read and parse cache file

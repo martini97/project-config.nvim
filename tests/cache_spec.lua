@@ -11,17 +11,17 @@ describe('cache', function ()
 
   describe('get_cached', function ()
     it('returns empty dict if file does not exists', function ()
-	    cache_file:rm()
+      cache_file:rm()
 
       assert.are.same(cache.get_cached(), vim.empty_dict())
     end)
 
     it('creates file if it doesnt exist', function ()
-	    cache_file:rm()
+      cache_file:rm()
       cache.get_cached()
 
-	    assert.is.True(cache_file:exists())
-	    assert.are.same(table.concat(cache_file:readlines(), '\n'), '{}')
+      assert.is.True(cache_file:exists())
+      assert.are.same(table.concat(cache_file:readlines(), '\n'), '{}')
     end)
 
     it('returns parsed data', function ()
@@ -30,9 +30,9 @@ describe('cache', function ()
         ['~/other/project'] = '98765',
       }
 
-	    cache_file:write(vim.fn.json_encode(data), 'w')
+      cache_file:write(vim.fn.json_encode(data), 'w')
 
-	    assert.are.same(cache.get_cached(), data)
+      assert.are.same(cache.get_cached(), data)
     end)
   end)
 
@@ -42,7 +42,7 @@ describe('cache', function ()
 
       cache.set_cached('my-key', 'value')
 
-	    assert.are.same(
+      assert.are.same(
         table.concat(cache_file:readlines(), '\n'),
         '{"my-key": "value"}'
       )
@@ -53,7 +53,7 @@ describe('cache', function ()
 
       cache.set_cached('my-key', 'value')
 
-	    assert.are.same(
+      assert.are.same(
         table.concat(cache_file:readlines(), '\n'),
         '{"other-key": "other value", "my-key": "value"}'
       )
@@ -64,7 +64,7 @@ describe('cache', function ()
 
       cache.set_cached('my-key', 'new value')
 
-	    assert.are.same(
+      assert.are.same(
         table.concat(cache_file:readlines(), '\n'),
         '{"my-key": "new value"}'
       )

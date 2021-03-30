@@ -15,6 +15,8 @@ describe('trust', function ()
 
   describe('is_trusted', function ()
     it('returns false if file missing', function ()
+      cache_file:rm()
+
       assert.Not.is.True(trust.is_trusted(file))
     end)
 

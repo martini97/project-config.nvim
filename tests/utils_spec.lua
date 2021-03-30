@@ -3,6 +3,7 @@ local stub = require('luassert.stub')
 local match = require('luassert.match')
 
 local utils = require('project_config.utils')
+local sha = require 'project_config.sha2'
 
 local know_sha_keymap = {
   ['lorem ipsum'] = '5e2bf57d3f40c4b6df69daf1936cb766f832374b4fc0259a7cbff06e2f70f269',
@@ -12,14 +13,6 @@ local know_sha_keymap = {
 }
 
 describe('utils', function ()
-  describe('sha256', function ()
-    it('return string sha', function ()
-      for str, sha in pairs(know_sha_keymap) do
-        assert.are.same(utils.sha256(str), sha)
-      end
-    end)
-  end)
-
   describe('file_signature', function ()
     it('return string sha', function ()
       for str, _ in pairs(know_sha_keymap) do
@@ -27,7 +20,7 @@ describe('utils', function ()
         file:write(str, 'w')
         assert.are.same(
           utils.file_signature(file),
-          utils.sha256(string.format('%q', str))
+          sha.sha256(string.format('%q', str))
         )
         file:rm()
       end

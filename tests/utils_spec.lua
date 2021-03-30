@@ -23,7 +23,7 @@ describe('utils', function ()
   describe('file_signature', function ()
     it('return string sha', function ()
       for str, _ in pairs(know_sha_keymap) do
-        local file = Path:new('tmp/file-signature.txt')
+        local file = Path:new('/tmp/file-signature.txt')
         file:write(str, 'w')
         assert.are.same(
           utils.file_signature(file),
@@ -34,7 +34,7 @@ describe('utils', function ()
     end)
 
     it('signature changes when file changes', function ()
-      local file = Path:new('tmp/file-signature.txt')
+      local file = Path:new('/tmp/file-signature-changed.txt')
 
       file:write('lorem ipsum', 'w')
       local old_signature = utils.file_signature(file)

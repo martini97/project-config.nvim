@@ -36,6 +36,7 @@ function trust.should_trust (file)
   return trusted == 1
 end
 
+-- sets file as trusted or not
 function trust.set_trust (file, trusted)
   local signature = ''
   if trusted then

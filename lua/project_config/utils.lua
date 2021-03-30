@@ -34,6 +34,7 @@ function utils.index_of (table, value)
   return index[value]
 end
 
+-- wrapper around vim confirm()
 function utils.confirm (dialog, options, default)
   local opts = table.concat(options, "\n")
   local def = utils.index_of(options, default)

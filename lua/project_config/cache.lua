@@ -1,22 +1,30 @@
-local M = {}
+local cache = {}
 
 local Path = require("plenary.path")
 
-function M.set_cached(value)
-  local p = Path:new(vim.g.project_config_cache_file)
-  p:write(vim.fn.json_encode(value), "w")
+local function get_cache_file ()
+  return Path:new(vim.g.project_config_cache_file)
 end
 
-function M.get_cached()
-  local p = Path:new(vim.g.project_config_cache_file)
-  local touched = p:touch({ parents = true })
+--- read and parse cache file
+function cache.get_cached()
+  local cache_file = get_cache_file()
+  local touched = cache_file:touch({ parents = true })
 
   if touched then
-    p:write("{}", "w")
+    cache_file:write("{}", "w")
     return vim.empty_dict()
   end
 
-  return vim.fn.json_decode(p:readlines())
+  return vim.fn.json_decode(cache_file:readlines())
 end
 
-return M
+--- set key on cache file
+function cache.set_cached(key, value)
+  local cache_file = get_cache_file()
+  local data = cache.get_cached()
+  data[key] = value
+  cache_file:write(vim.fn.json_encode(data), "w")
+end
+
+return cache

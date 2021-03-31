@@ -1,26 +1,42 @@
-local M = {}
+local plugin = {}
 
 local utils = require('project_config.utils')
 local trust = require('project_config.trust')
 
-function M.source_settings()
-  local project_file = utils.get_project_file()
+-- sources config if it exists, if it's changed since the last time
+-- ask confirmation
+function plugin.source_config()
+  local config_file = utils.get_config_file()
+  if not trust.should_trust(config_file) then return end
 
-  if not project_file then return end
-  if not trust.should_trust(project_file) then return end
+  trust.set_trust(config_file, true)
 
-  trust.set_trust(project_file, true)
-
-  vim.cmd("silent source " .. project_file)
+  vim.cmd("silent source " .. config_file:absolute())
 end
 
-function M.untrust()
-  local project_file = utils.get_project_file()
+-- edit project config, if file does not exists it will create it
+function plugin.edit_config()
+  local config_file = utils.get_config_file()
 
-  if not project_file then return end
-  if not trust.has_trust(project_file) then return end
+  if not config_file:exists() then
+    config_file:write(
+      '" This is the config file for: ' .. vim.loop.cwd() .. '\n\n', 'w'
+    )
+  end
 
-  trust.set_trust(project_file, false)
+  vim.cmd("silent edit " .. config_file:absolute())
+  vim.api.nvim_feedkeys('G', 'n', false)
 end
 
-return M
+-- marks the current config as untrusted
+function plugin.untrust_config()
+  local config_file = utils.get_config_file()
+
+  if not config_file:exists() then
+    return
+  end
+
+  trust.set_trust(config_file, false)
+end
+
+return plugin

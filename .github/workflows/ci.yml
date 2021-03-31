@@ -3,6 +3,18 @@ name: ci
 on: [push, pull_request]
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt-get install luarocks -q
+          sudo luarocks install luacheck
+      - name: lint
+        run: luacheck .
+
   tests:
     name: Tests
     runs-on: ubuntu-20.04

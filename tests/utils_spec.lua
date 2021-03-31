@@ -1,70 +1,81 @@
-local Path = require('plenary.path')
+local Path = require("plenary.path")
 local stub = require('luassert.stub')
 local match = require('luassert.match')
 
 local utils = require('project_config.utils')
+local sha = require 'project_config.sha2'
+
+local know_sha_keymap = {
+  ['lorem ipsum'] = '5e2bf57d3f40c4b6df69daf1936cb766f832374b4fc0259a7cbff06e2f70f269',
+  ['Sed ut perspiciatis unde omnis iste natus error sit voluptatem'] =
+    'a385db1cb85e9969d0af177f66b7d5eba60788d24b083cf3fc254cb5743737ea',
+  ['with\nline\nbreak'] = 'ad5b39b6a4be0f580a28a6c20d3a82a6f5f3890b6eae051f7d243d257a130a2f',
+}
 
 describe('utils', function ()
-  describe('index_of', function ()
-    it('returns index of value', function()
-      local table = {"lorem", "ipsum", "dolor", "sit"}
-      local value = "dolor"
-      local index = 3
-
-      assert.are.same(utils.index_of(table, value), index)
+  describe('file_signature', function ()
+    it('return string sha', function ()
+      for str, _ in pairs(know_sha_keymap) do
+        local file = Path:new('/tmp/file-signature.txt')
+        file:write(str, 'w')
+        assert.are.same(
+          utils.file_signature(file),
+          sha.sha256(string.format('%q', str))
+        )
+        file:rm()
+      end
     end)
 
-    it('returns nil if value not in table', function()
-      local table = {"lorem", "ipsum", "dolor", "sit"}
-      local value = "amet"
-      local index = nil
+    it('signature changes when file changes', function ()
+      local file = Path:new('/tmp/file-signature-changed.txt')
 
-      assert.are.same(utils.index_of(table, value), index)
+      file:write('lorem ipsum', 'w')
+      local old_signature = utils.file_signature(file)
+
+      file:write('dolor sit', 'w')
+      local new_signature = utils.file_signature(file)
+
+      assert.Not.are.same(old_signature, new_signature)
+      file:rm()
+    end)
+
+    it('return nil if file does not exist', function ()
+      local file = Path:new('tmp/missing.txt')
+      assert.are.same(utils.file_signature(file), nil)
     end)
   end)
 
-  describe('sha256', function ()
-    local sha_file = Path:new("tmp/test-sha256.txt")
+  describe('get_config_file', function ()
+    it('return cwd config file', function ()
+      local stubbed = stub(vim.loop, 'cwd')
+      stubbed.returns('/home/user/linux/.config/nvim')
 
-    before_each(function ()
-      sha_file:touch({ parents = true })
+      local received = utils.get_config_file():absolute()
+      local expected = vim.fn.stdpath('data') ..
+        '/project_config/aa9f5819ba69643a70dd2da3f5f32882d1ff4354196446048e8e8f7016f3d6bd.vim'
+
+      assert.are.same(expected, received)
+      stubbed:revert()
     end)
+  end)
 
-    after_each(function ()
-      sha_file:rm()
-    end)
+  describe('index_of', function ()
+    it('index_of', function ()
+      it('returns index of value', function()
+        local table = {"lorem", "ipsum", "dolor", "sit"}
+        local value = "dolor"
+        local index = 3
 
-    it('returns file sha256', function()
-      sha_file:write("lorem ipsum dolor sit amet", "w")
+        assert.are.same(utils.index_of(table, value), index)
+      end)
 
-      local sha = "2f8586076db2559d3e72a43c4ae8a1f5957abb23ca4a1f46e380dd640536eedb"
-      assert.are.same(utils.sha256(sha_file), sha)
-    end)
+      it('returns nil if value not in table', function()
+        local table = {"lorem", "ipsum", "dolor", "sit"}
+        local value = "amet"
+        local index = nil
 
-    it('changes if file changes', function()
-      sha_file:write("lorem ipsum dolor sit amet", "w")
-      local old_sha = utils.sha256(sha_file)
-
-      sha_file:write("consectetur adipiscing elit", "a")
-      local new_sha = utils.sha256(sha_file)
-
-      assert.Not.are.same(old_sha, new_sha)
-    end)
-
-    it('returns nil if file does not exist', function()
-      sha_file:rm()
-
-      assert.are.same(utils.sha256(sha_file), nil)
-    end)
-
-    it('does not change if file updated but content did not changed', function()
-      sha_file:write("lorem ipsum dolor sit amet", "w")
-      local old_sha = utils.sha256(sha_file)
-
-      sha_file:touch()
-      local new_sha = utils.sha256(sha_file)
-
-      assert.are.same(old_sha, new_sha)
+        assert.are.same(utils.index_of(table, value), index)
+      end)
     end)
   end)
 
@@ -94,29 +105,6 @@ describe('utils', function ()
       local output = utils.confirm("Dialog?", {"y", "n"}, "n")
 
       assert.are.same(output, 2)
-    end)
-  end)
-
-  describe('get_project_file', function()
-    local project_file = Path:new('.test-get-project-file.vim')
-    local old_project_config = vim.g.project_config_file
-
-    before_each(function()
-      vim.g.project_config_file = '.test-get-project-file.vim'
-    end)
-
-    after_each(function()
-      vim.g.project_config_file = old_project_config
-      project_file:rm()
-    end)
-
-    it('returns nil if file does not exists', function()
-      assert.are.same(utils.get_project_file(), nil)
-    end)
-
-    it('returns absolute path to file if exists', function()
-      project_file:touch()
-      assert.are.same(utils.get_project_file(), project_file:absolute())
     end)
   end)
 end)

@@ -1,6 +1,5 @@
 -- This will handle rendering the preview window
 local window = {}
-local Path = require('plenary.path')
 local float = require('plenary.window.float')
 
 local function wincmd(win_id, cmd)

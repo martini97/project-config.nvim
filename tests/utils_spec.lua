@@ -7,6 +7,7 @@ local sha = require 'project_config.sha2'
 
 local know_sha_keymap = {
   ['lorem ipsum'] = '5e2bf57d3f40c4b6df69daf1936cb766f832374b4fc0259a7cbff06e2f70f269',
+  -- luacheck: max line length 140
   ['Sed ut perspiciatis unde omnis iste natus error sit voluptatem'] = 'a385db1cb85e9969d0af177f66b7d5eba60788d24b083cf3fc254cb5743737ea',
   ['with\nline\nbreak'] = 'ad5b39b6a4be0f580a28a6c20d3a82a6f5f3890b6eae051f7d243d257a130a2f'
 }

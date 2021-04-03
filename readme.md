@@ -80,8 +80,9 @@ nmap <space>! <plug>ProjectConfigUntrust
 
 + [x] Implement trusted files
 + [x] Write tests
-+ [ ] Save config files on data dir
-+ [ ] Preview file before execution
++ [x] Save config files on data dir
++ [x] Command to edit/create config file
++ [-] Preview file before execution
 + [ ] Allow user to distrust a file permanently
-+ [ ] Command to edit/create config file
++ [ ] Write docs (`:h project_config`)
 + [ ] Use `:inputlist()` instead of confirm

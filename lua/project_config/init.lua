@@ -12,6 +12,7 @@ function plugin.source_config()
 
   trust.set_trust(config_file, true)
 
+  utils.source(config_file)
   vim.cmd("silent source " .. config_file:absolute())
 end
 
@@ -43,6 +44,7 @@ end
 function plugin.trust_file()
   local config_file = utils.get_config_file()
   trust.set_trust(config_file, true)
+  utils.source(config_file)
   vim.cmd [[wincmd c]]
 end
 

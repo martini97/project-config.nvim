@@ -1,10 +1,20 @@
 local Path = require('plenary.path')
 local stub = require('luassert.stub')
+local match = require("luassert.match")
 
 local plugin = require 'project_config'
 local cache = require 'project_config.cache'
 local utils = require 'project_config.utils'
 local window = require 'project_config.window'
+
+local function is_same_path(_, args)
+  local file = args[1]
+	return function (value)
+    return value:absolute() == file:absolute()
+	end
+end
+
+assert:register("matcher", "same_path", is_same_path)
 
 describe('project_config', function()
   local stubbed_confirm
@@ -111,6 +121,44 @@ describe('project_config', function()
       plugin.untrust_config()
 
       assert.are.same(cache.get_cached()[config_file:absolute()], '')
+    end)
+  end)
+
+  describe('trust_file', function()
+    local stubbed_cmd
+    local stubbed_source
+
+    before_each(function()
+      stubbed_cmd = stub(vim, 'cmd')
+      stubbed_source = stub(utils, 'source')
+    end)
+
+    after_each(function()
+      stubbed_cmd:revert()
+      stubbed_source:revert()
+    end)
+
+    it('marks file as trusted', function()
+      assert.are.same(cache.get_cached()[config_file:absolute()], nil)
+
+      plugin.trust_file()
+
+      assert.are.same(cache.get_cached()[config_file:absolute()],
+                      utils.file_signature(config_file))
+    end)
+
+    it('sources file', function()
+      plugin.trust_file()
+
+      assert.stub(utils.source).was.called(1)
+      assert.stub(utils.source).was.called_with(match.is_same_path(config_file))
+    end)
+
+    it('closes current window', function()
+      plugin.trust_file()
+
+      assert.stub(vim.cmd).was.called(1)
+      assert.stub(vim.cmd).was.called_with("wincmd c")
     end)
   end)
 end)

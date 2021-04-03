@@ -10,12 +10,12 @@ end
 
 -- TODO(martini97, 2021-04-03): allow user to override mappings
 function window.preview(file)
-    local project = Path:new(vim.loop.cwd())
-    local message = {
-        ("Previewing config file for: %s"):format(project:normalize()),
-        "[<A-y>]: trust the file\t|\t[<A-n>]: don't trust and quit this window"
-    }
-    local win = float.centered_with_top_win(message, {winblend = 0})
+  local homey_path = vim.loop.cwd():gsub("^" .. vim.env.HOME, '~', 1)
+  local message = {
+    ("Previewing config file for: %s"):format(homey_path),
+    "[<A-y>]: trust the file\t|\t[<A-n>]: don't trust and quit this window"
+  }
+  local win = float.centered_with_top_win(message, {winblend = 0})
 
     local close_cmd = ":" .. wincmd(win.win_id, "c") .. "<cr>"
 

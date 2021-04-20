@@ -7,10 +7,12 @@ local trust = require('project_config.trust')
 -- ask confirmation
 function plugin.source_config()
   local config_file = utils.get_config_file()
+
   if not trust.should_trust(config_file) then return end
 
   trust.set_trust(config_file, true)
 
+  utils.source(config_file)
   vim.cmd("silent source " .. config_file:absolute())
 end
 
@@ -19,9 +21,8 @@ function plugin.edit_config()
   local config_file = utils.get_config_file()
 
   if not config_file:exists() then
-    config_file:write(
-      '" This is the config file for: ' .. vim.loop.cwd() .. '\n\n', 'w'
-    )
+    config_file:write('" This is the config file for: ' .. vim.loop.cwd() ..
+                        '\n\n', 'w')
   end
 
   vim.cmd("silent edit " .. config_file:absolute())
@@ -32,11 +33,19 @@ end
 function plugin.untrust_config()
   local config_file = utils.get_config_file()
 
-  if not config_file:exists() then
-    return
-  end
+  if not config_file:exists() then return end
 
   trust.set_trust(config_file, false)
+end
+
+-- external function used by the preview window, will automatically trust the
+-- current project config file and close the current window (should be the
+-- preview window)
+function plugin.trust_file()
+  local config_file = utils.get_config_file()
+  trust.set_trust(config_file, true)
+  utils.source(config_file)
+  vim.cmd [[wincmd c]]
 end
 
 return plugin

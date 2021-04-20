@@ -1,26 +1,36 @@
 local trust = require('project_config.trust')
 local utils = require('project_config.utils')
 local cache = require('project_config.cache')
+local window = require('project_config.window')
 local Path = require('plenary.path')
 local stub = require('luassert.stub')
 
-describe('trust', function ()
+describe('trust', function()
   local cache_file = Path:new(vim.g.project_config_cache_file)
   local file = Path:new('/tmp/test-trust' .. vim.loop.getpid() .. '.txt')
+  local stubbed_preview
+  local stubbed_confirm
 
-  after_each(function ()
-    cache_file:rm()
-    file:rm()
+  before_each(function()
+    stubbed_preview = stub(window, 'preview')
+    stubbed_confirm = stub(utils, 'confirm')
   end)
 
-  describe('is_trusted', function ()
-    it('returns false if file missing', function ()
+  after_each(function()
+    cache_file:rm()
+    file:rm()
+    stubbed_preview:revert()
+    stubbed_confirm:revert()
+  end)
+
+  describe('is_trusted', function()
+    it('returns false if file missing', function()
       cache_file:rm()
 
       assert.Not.is.True(trust.is_trusted(file))
     end)
 
-    it('returns true signature in file matches file', function ()
+    it('returns true signature in file matches file', function()
       file:write('lorem ipsum', 'w')
       local signature = utils.file_signature(file)
       cache.set_cached(file:absolute(), signature)
@@ -38,7 +48,6 @@ describe('trust', function ()
     end)
 
     it('calls confirm', function()
-      local stubbed = stub(utils, 'confirm')
       file:touch()
 
       trust.should_trust(file)
@@ -46,40 +55,43 @@ describe('trust', function ()
       assert.stub(utils.confirm).was.called(1)
       assert.stub(utils.confirm).was.called_with(
         "Do you want to trust " .. file:normalize() .. "?",
-        {"yes", "no"},
-        "no"
-      )
-
-      stubbed:revert()
+        {"yes", "No", "preview"}, "no")
     end)
 
     it('returns true if user answered "y"', function()
       file:touch()
-      local stubbed = stub(utils, 'confirm')
-      stubbed.returns(1)
+      stubbed_confirm.returns(1)
 
       assert.is.True(trust.should_trust(file))
-
-      stubbed:revert()
     end)
 
     it('returns false if user answered "f"', function()
-      local stubbed = stub(utils, 'confirm')
-      stubbed.returns(2)
+      stubbed_confirm.returns(2)
 
       assert.Not.is.True(trust.should_trust(file))
-
-      stubbed:revert()
     end)
 
     it('returns false if file missing', function()
-      local stubbed = stub(utils, 'confirm')
-      stubbed.returns(1)
+      stubbed_confirm.returns(1)
       file:rm()
 
       assert.Not.is.True(trust.should_trust(file))
+    end)
 
-      stubbed:revert()
+    it('returns false if user answered "p"', function()
+      file:touch()
+      stubbed_confirm.returns(3)
+
+      assert.is.False(trust.should_trust(file))
+    end)
+
+    it('calls preview if user answered "p"', function()
+      file:touch()
+      stubbed_confirm.returns(3)
+
+      trust.should_trust(file)
+
+      assert.stub(window.preview).was.called(1)
     end)
   end)
 

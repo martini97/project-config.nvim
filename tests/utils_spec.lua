@@ -7,26 +7,24 @@ local sha = require 'project_config.sha2'
 
 local know_sha_keymap = {
   ['lorem ipsum'] = '5e2bf57d3f40c4b6df69daf1936cb766f832374b4fc0259a7cbff06e2f70f269',
-  ['Sed ut perspiciatis unde omnis iste natus error sit voluptatem'] =
-    'a385db1cb85e9969d0af177f66b7d5eba60788d24b083cf3fc254cb5743737ea',
-  ['with\nline\nbreak'] = 'ad5b39b6a4be0f580a28a6c20d3a82a6f5f3890b6eae051f7d243d257a130a2f',
+  -- luacheck: max line length 140
+  ['Sed ut perspiciatis unde omnis iste natus error sit voluptatem'] = 'a385db1cb85e9969d0af177f66b7d5eba60788d24b083cf3fc254cb5743737ea',
+  ['with\nline\nbreak'] = 'ad5b39b6a4be0f580a28a6c20d3a82a6f5f3890b6eae051f7d243d257a130a2f'
 }
 
-describe('utils', function ()
-  describe('file_signature', function ()
-    it('return string sha', function ()
+describe('utils', function()
+  describe('file_signature', function()
+    it('return string sha', function()
       for str, _ in pairs(know_sha_keymap) do
         local file = Path:new('/tmp/file-signature.txt')
         file:write(str, 'w')
-        assert.are.same(
-          utils.file_signature(file),
-          sha.sha256(string.format('%q', str))
-        )
+        assert.are.same(utils.file_signature(file),
+                        sha.sha256(string.format('%q', str)))
         file:rm()
       end
     end)
 
-    it('signature changes when file changes', function ()
+    it('signature changes when file changes', function()
       local file = Path:new('/tmp/file-signature-changed.txt')
 
       file:write('lorem ipsum', 'w')
@@ -39,28 +37,28 @@ describe('utils', function ()
       file:rm()
     end)
 
-    it('return nil if file does not exist', function ()
+    it('return nil if file does not exist', function()
       local file = Path:new('tmp/missing.txt')
       assert.are.same(utils.file_signature(file), nil)
     end)
   end)
 
-  describe('get_config_file', function ()
-    it('return cwd config file', function ()
+  describe('get_config_file', function()
+    it('return cwd config file', function()
       local stubbed = stub(vim.loop, 'cwd')
       stubbed.returns('/home/user/linux/.config/nvim')
 
       local received = utils.get_config_file():absolute()
       local expected = vim.fn.stdpath('data') ..
-        '/project_config/aa9f5819ba69643a70dd2da3f5f32882d1ff4354196446048e8e8f7016f3d6bd.vim'
+                         '/project_config/aa9f5819ba69643a70dd2da3f5f32882d1ff4354196446048e8e8f7016f3d6bd.vim'
 
       assert.are.same(expected, received)
       stubbed:revert()
     end)
   end)
 
-  describe('index_of', function ()
-    it('index_of', function ()
+  describe('index_of', function()
+    it('index_of', function()
       it('returns index of value', function()
         local table = {"lorem", "ipsum", "dolor", "sit"}
         local value = "dolor"
@@ -82,13 +80,9 @@ describe('utils', function ()
   describe('confirm', function()
     local stubed_eval
 
-    before_each(function()
-      stubed_eval = stub(vim.api, "nvim_eval")
-    end)
+    before_each(function() stubed_eval = stub(vim.api, "nvim_eval") end)
 
-    after_each(function()
-      stubed_eval:revert()
-    end)
+    after_each(function() stubed_eval:revert() end)
 
     it('call nvim_eval', function()
       utils.confirm("Dialog?", {"y", "n"}, "n")
@@ -96,8 +90,7 @@ describe('utils', function ()
       assert.stub(vim.api.nvim_eval).was.called(1)
       assert.stub(vim.api.nvim_eval).was.called_with(match.is_string())
       assert.stub(vim.api.nvim_eval).was.called_with(
-        match.has_match('^confirm."Dialog.", "y\nn", "2".')
-      )
+        match.has_match('^confirm."Dialog.", "y\nn", "2".'))
     end)
 
     it('returns nvim_eval output', function()
@@ -105,6 +98,28 @@ describe('utils', function ()
       local output = utils.confirm("Dialog?", {"y", "n"}, "n")
 
       assert.are.same(output, 2)
+    end)
+  end)
+
+  describe('source', function()
+    local stubbed_cmd
+    local file_name = ("/tmp/%s-%d.txt"):format(os.time(os.date("!*t")),
+                                                vim.loop.getpid())
+    local file = Path:new(file_name)
+
+    before_each(function()
+      stubbed_cmd = stub(vim, 'cmd')
+      file:write('lorem ipsum', 'w')
+    end)
+
+    after_each(function()
+      file:rm()
+      stubbed_cmd:revert()
+    end)
+
+    it('sources the given file', function()
+      utils.source(file)
+      assert.stub(vim.cmd).was.called(1)
     end)
   end)
 end)
